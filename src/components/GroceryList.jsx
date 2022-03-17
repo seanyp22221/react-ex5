@@ -1,19 +1,24 @@
-import React, {useState, useEffect} from 'react';
+import React, {useState} from 'react';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
-import  {faChevronRight, faChevronLeft, faCircle, faCheckCircle, faPlus, faMinus} from '@fortawesome/free-solid-svg-icons';
+import  {faChevronRight, faChevronLeft, faCircle, faCheckCircle, faPlus, faMinus, faTrash, faDeaf} from '@fortawesome/free-solid-svg-icons';
 import '../index.css';
 
 const GroceryList = () =>{
-    const [items, setItems] = useState([
+    const defaultItemList = [];
+
+    const initialItemList = [
         {itemName: 'Item 1', quantity: 1, isSelected: false},
         {itemName: 'Item 2', quantity: 3, isSelected: false},
         {itemName: 'Item 3', quantity: 2, isSelected: false},
-  ]);
+  ];
 
-  const [inputValue, setInputValue] = useState('');
-	const [totalItemCount, setTotalItemCount] = useState(6);
+    const [items, setItems] = useState(initialItemList);
 
-	const handleAddButtonClick = () => {
+    const [inputValue, setInputValue] = useState('');
+
+	const [totalItemCount, setTotalItemCount] = useState(1);
+
+	const handleAddItem = () => {
 		const newItem = {
 			itemName: inputValue,
 			quantity: 1,
@@ -24,9 +29,11 @@ const GroceryList = () =>{
 		const newItems = [...items, newItem];
 
 		setItems(newItems);
-		setInputValue('');
 		calculateTotal();
-	};
+		setInputValue('');
+        //Workaround
+        
+	}
 
 	const handleQuantityIncrease = (index) => {
 		const newItems = [...items];
@@ -35,30 +42,64 @@ const GroceryList = () =>{
 
 		setItems(newItems);
 		calculateTotal();
-	};
+	}
 
 	const handleQuantityDecrease = (index) => {
 		const newItems = [...items];
-    if(newItems[index].quantity >= 1)
+    if(newItems[index].quantity >= 1){
 		    newItems[index].quantity-- ;
-		setItems(newItems);
-		calculateTotal();
-	};
+
+		    setItems(newItems);
+		    calculateTotal();
+        }
+	}
 
 	const toggleComplete = (index) => {
 		const newItems = [...items];
-
-		newItems[index].isSelected = !newItems[index].isSelected;
+        // Sets to the opposite of the current state
+		newItems[index].isSelected = ! newItems[index].isSelected;
 
 		setItems(newItems);
+	}
+
+    const clearItems = () =>{
+    
+        const newItems = defaultItemList;
+        setItems(newItems);
+        calculateTotal();
+    }
+    
+    const clearSelected = () => {
+        const newItems = [...items];
+        for(var i = 0; i < newItems.length; i++){
+		    if(newItems[i].isSelected){
+                newItems.splice(i,1);
+            }
+        }
+        setItems(newItems);
+        calculateTotal();
+    };
+
+    const calculateTotal_EX = () => {
+        var totalItems = 0;
+		// const totalItems = items.reduce((total, item) => {
+		// 	return total + item.quantity;
+		// }, 0);
+
+        for(var i = 0; i < items.length; i++){
+            totalItems = totalItems + items[i].quantity;
+
+        }
+		setTotalItemCount(totalItems);
 	};
 
 	const calculateTotal = () => {
-		const totalItemCount = items.reduce((total, item) => {
+		const totalItems = items.reduce((total, item) => {
 			return total + item.quantity;
 		}, 0);
 
-		setTotalItemCount(totalItemCount);
+		setTotalItemCount(totalItems);
+       
 	};
 
 	return (
@@ -66,8 +107,9 @@ const GroceryList = () =>{
 			<div className='main-container'>
 				<div className='add-item-box'>
 					<input value={inputValue} onChange={(event) => setInputValue(event.target.value)} className='add-item-input' placeholder='Add an item...' />
-					<FontAwesomeIcon icon={faPlus} onClick={() => handleAddButtonClick()} />
-					<FontAwesomeIcon icon={faMinus} onClick={() => handleAddButtonClick()} />
+					<FontAwesomeIcon icon={faPlus} onClick={() => handleAddItem()} />
+					<FontAwesomeIcon icon={faMinus} onClick={() => clearSelected()} />
+					<FontAwesomeIcon icon={faTrash} onClick={() => clearItems()} />
 				</div>
 				<div className='item-list'>
 					{items.map((item, index) => (
